@@ -1,0 +1,8 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\Matteo\\OneDrive - Politecnico di Milano\\Programmazione\\ProgettiJava\\Librerie esterne\\Utilities.jar",
+        "c:\\Users\\sprea\\OneDrive - Politecnico di Milano\\Programmazione\\ProgettiJava\\Librerie esterne\\Utilities.jar"
+    ],
+    "cmake.configureOnOpen": false
+}
