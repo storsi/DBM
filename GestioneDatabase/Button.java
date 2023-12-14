@@ -46,7 +46,7 @@ public class Button extends JButton implements ActionListener{
             break;
             case FinalVariable.AGG_COLONNA: panel.aggiungiColonnaTab();
             break;
-            case FinalVariable.BOTT_TAB:
+            case FinalVariable.BOTT_TAB: panel.apriTabella(getText());
             break;
             case FinalVariable.BOTT_DB: panel.setDBscelto(text);
             break;

@@ -5,10 +5,13 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 
 import java.awt.GridLayout;
 import javax.swing.JTextArea;
@@ -80,7 +83,15 @@ public class Panel extends JPanel implements DocumentListener{
     }
 
     private void connettiConDB() {
-        sql = new SqLite(FinalVariable.PATH_TO_DB + dbScelto + ".db");
+        //TRUE: FISSO, FALSE: PORTATILE
+        boolean dispositivo = true;
+
+        String path = "";
+
+        if(dispositivo) path = FinalVariable.PATH_TO_DB_FISSO;
+        else path = FinalVariable.PATH_TO_DB_PORTATILE;
+
+        sql = new SqLite(path  + dbScelto + ".db");
     }
 
     public void setDBscelto(String dbScelto) {
@@ -276,5 +287,33 @@ public class Panel extends JPanel implements DocumentListener{
         }
 
         return true;
+    }
+
+
+    //Si occupa della gestione e dell'apertura della tabella
+    public void apriTabella(String nomeTab) {
+        remAll(pnl_Button);
+        this.nomeTabella = nomeTab;
+
+        Object[][] data = {
+                {"John", "Doe", 25},
+                {"Jane", "Smith", 30},
+                {"Bob", "Johnson", 22}
+        };
+
+        // Column names
+        String[] columnNames = {"First Name", "Last Name", "Age"};
+
+        // Create a table model
+        DefaultTableModel model = new DefaultTableModel(data, columnNames);
+
+        // Create the JTable
+        JTable jTable = new JTable(model);
+
+        // Add the table to a scroll pane
+        JScrollPane scrollPane = new JScrollPane(jTable);
+
+        // Add the scroll pane to the frame
+        pnl_Button.add(scrollPane);
     }
 }

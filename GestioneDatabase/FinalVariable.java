@@ -6,7 +6,8 @@ import java.awt.FlowLayout;
 public class FinalVariable {
     
     //STRINGHE - array
-    public static String PATH_TO_DB = "C:\\\\Users\\\\Matteo\\\\OneDrive - Politecnico di Milano\\\\Programmazione\\\\SqLite\\\\";
+    public static String PATH_TO_DB_FISSO = "C:\\\\Users\\\\Matteo\\\\OneDrive - Politecnico di Milano\\\\Programmazione\\\\SqLite\\\\";
+    public static String PATH_TO_DB_PORTATILE = "C:\\\\Users\\\\sprea\\\\OneDrive - Politecnico di Milano\\\\Programmazione\\\\SqLite\\\\";
     //STRINGHE - valori
     public static String[] ALL_DATABASES = {"calcio.db"};
 
