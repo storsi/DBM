@@ -26,6 +26,6 @@ public class FinalVariable {
     //LAYOUT
     public static final FlowLayout FL_C20_20 = new FlowLayout(FlowLayout.CENTER, 20, 20);
     public static final FlowLayout FL_L10_10 = new FlowLayout(FlowLayout.LEFT, 10, 10);
-    public static final FlowLayout FL_C0_0 = new FlowLayout(FlowLayout.LEFT, 0, 0);
+    public static final FlowLayout FL_L0_0 = new FlowLayout(FlowLayout.LEFT, 0, 0);
     
 }

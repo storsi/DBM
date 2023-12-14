@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
@@ -14,6 +15,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.GridLayout;
+import java.sql.Array;
+
 import javax.swing.JTextArea;
 
 import Utilities.SqLite;
@@ -79,7 +82,7 @@ public class Panel extends JPanel implements DocumentListener{
             pnl_Button.add(new Button(150, 150, r.get(i), this, FinalVariable.BOTT_TAB));
         }
 
-        pnl_Button.add(new Button(150, 150, "aggiungi tabella", this, FinalVariable.BOTT_AGG_TAB));
+        pnl_Button.add(new Button(150, 150, "<html>aggiungi<br>tabella</html>", this, FinalVariable.BOTT_AGG_TAB));
     }
 
     private void connettiConDB() {
@@ -102,6 +105,8 @@ public class Panel extends JPanel implements DocumentListener{
 
     private void remAll(JPanel panel) {
         panel.removeAll();
+        panel.validate();
+        panel.repaint();
         System.gc();
     }
 
@@ -293,19 +298,30 @@ public class Panel extends JPanel implements DocumentListener{
     //Si occupa della gestione e dell'apertura della tabella
     public void apriTabella(String nomeTab) {
         remAll(pnl_Button);
-        this.nomeTabella = nomeTab;
+        this.nomeTabella = nomeTab.toLowerCase();
 
-        Object[][] data = {
-                {"John", "Doe", 25},
-                {"Jane", "Smith", 30},
-                {"Bob", "Johnson", 22}
-        };
+        lbl_titolo.setText("TABELLA: " + nomeTab);
+
+
+        r = sql.getColumns(nomeTabella);
+        String query = "SELECT * FROM " + nomeTabella + ";";
+
+        ArrayList<String> a = sql.queryToDB(query, r.get(0));
+
+        pnl_Button.setLayout(FinalVariable.FL_L0_0);
+        System.out.println(a.size());
+        Object[][] data = new Object[sql.queryToDB(query, r.get(0)).size()][r.size()];
+
+        for(int i = 0; i < r.size(); i++) {
+            System.out.println(query);
+            data[i] = sql.queryToDB(query, r.get(i)).toArray();
+        }
 
         // Column names
-        String[] columnNames = {"First Name", "Last Name", "Age"};
+        //String[] columnNames = {"First Name", "Last Name", "Age"};
 
         // Create a table model
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
+        DefaultTableModel model = new DefaultTableModel(data, r.toArray());
 
         // Create the JTable
         JTable jTable = new JTable(model);

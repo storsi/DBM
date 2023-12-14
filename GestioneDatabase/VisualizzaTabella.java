@@ -19,7 +19,7 @@ public class VisualizzaTabella extends JPanel{
         this.sqlite = sqlite;
         this.nomeTab = nomeTab;
 
-        setLayout(FinalVariable.FL_C0_0);
+        setLayout(FinalVariable.FL_L0_0);
 
         creaTab();
 
