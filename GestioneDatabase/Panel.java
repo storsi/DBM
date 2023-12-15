@@ -87,7 +87,7 @@ public class Panel extends JPanel implements DocumentListener{
 
     private void connettiConDB() {
         //TRUE: FISSO, FALSE: PORTATILE
-        boolean dispositivo = true;
+        boolean dispositivo = false;
 
         String path = "";
 
@@ -312,10 +312,14 @@ public class Panel extends JPanel implements DocumentListener{
         System.out.println(a.size());
         Object[][] data = new Object[sql.queryToDB(query, r.get(0)).size()][r.size()];
 
-        for(int i = 0; i < r.size(); i++) {
-            System.out.println(query);
-            data[i] = sql.queryToDB(query, r.get(i)).toArray();
+        for(int j = 0; j < r.size(); j++) {
+            Object[] res = sql.queryToDB(query, r.get(j)).toArray();
+
+            for(int i = 0; i < res.length; i++) {
+                data[i][j] = res[i];
+            }
         }
+        
 
         // Column names
         //String[] columnNames = {"First Name", "Last Name", "Age"};
@@ -328,6 +332,8 @@ public class Panel extends JPanel implements DocumentListener{
 
         // Add the table to a scroll pane
         JScrollPane scrollPane = new JScrollPane(jTable);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
         // Add the scroll pane to the frame
         pnl_Button.add(scrollPane);
