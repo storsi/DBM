@@ -3,7 +3,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -28,6 +27,7 @@ public class Panel extends JPanel implements DocumentListener{
     private JPanel pnl_Button;
     private Button btn_creaTab;
     private JTextArea nomeTab;
+    private boolean dispositivo = true; //TRUE: FISSO, FALSE: PORTATILE
     
     /**
      * 
@@ -82,9 +82,6 @@ public class Panel extends JPanel implements DocumentListener{
     }
 
     private void connettiConDB() {
-        //TRUE: FISSO, FALSE: PORTATILE
-        boolean dispositivo = false;
-
         String path = "";
 
         if(dispositivo) path = FinalVariable.PATH_TO_DB_FISSO;
