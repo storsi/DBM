@@ -4,13 +4,12 @@ import javax.swing.JFrame;
 
 public class Frame extends JFrame{
 
-    public Frame(int width, int height) {
+    public Frame() {
 
-        setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        add(new Panel(width, height));
+        add(new Panel());
 
         pack();
         setLocationRelativeTo(null);

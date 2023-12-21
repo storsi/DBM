@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 
 public class FinalVariable {
+
+    //Valore del panel
+    public static final int PANEL_WIDTH = 1200;
+    public static final int PANEL_HEIGHT = 700;
     
     //STRINGHE - array
     public static String PATH_TO_DB_FISSO = "C:\\Users\\Matteo\\OneDrive - Politecnico di Milano\\Programmazione\\SqLite\\";
@@ -22,6 +26,8 @@ public class FinalVariable {
 
     //COLORI
     public static final Color ERROR_COLOR = new Color(233, 116, 81);
+    public static final Color CELLA_COLONNA = Color.YELLOW;
+    public static final Color CELLA_DATO = Color.WHITE;
 
     //LAYOUT
     public static final FlowLayout FL_C20_20 = new FlowLayout(FlowLayout.CENTER, 20, 20);

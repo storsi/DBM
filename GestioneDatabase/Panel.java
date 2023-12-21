@@ -3,19 +3,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
 
 import java.awt.GridLayout;
-import java.sql.Array;
 
 import javax.swing.JTextArea;
 
@@ -38,12 +34,12 @@ public class Panel extends JPanel implements DocumentListener{
      * @param width
      * @param height
      */
-    public Panel(int width, int height) {
+    public Panel() {
 
         arrAc = new ArrayList<AggColonna>();
 
         lbl_titolo = new JLabel("", SwingConstants.CENTER);
-        lbl_titolo.setPreferredSize(new Dimension(width, 50));
+        lbl_titolo.setPreferredSize(new Dimension(FinalVariable.PANEL_WIDTH, 50));
 
         pnl_Button = new JPanel();
         nomeTabella = "";
@@ -51,7 +47,7 @@ public class Panel extends JPanel implements DocumentListener{
         add(lbl_titolo);
         add(pnl_Button);
 
-        setPreferredSize(new Dimension(width, height));
+        setPreferredSize(new Dimension(FinalVariable.PANEL_WIDTH, FinalVariable.PANEL_HEIGHT));
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
 
         mostraDatabases();
@@ -298,44 +294,18 @@ public class Panel extends JPanel implements DocumentListener{
     //Si occupa della gestione e dell'apertura della tabella
     public void apriTabella(String nomeTab) {
         remAll(pnl_Button);
-        this.nomeTabella = nomeTab.toLowerCase();
 
-        lbl_titolo.setText("TABELLA: " + nomeTab);
+        pnl_Button.setLayout(FinalVariable.FL_C20_20);
+        lbl_titolo.setText("TABELLA: " + nomeTab.toUpperCase());
 
+        r = sql.getColumns(nomeTab);
+        String query = "SELECT * FROM " + nomeTab;
+        String[][] dati = new String[r.size()][sql.queryToDB(query, r.get(0)).size()];
 
-        r = sql.getColumns(nomeTabella);
-        String query = "SELECT * FROM " + nomeTabella + ";";
-
-        ArrayList<String> a = sql.queryToDB(query, r.get(0));
-
-        pnl_Button.setLayout(FinalVariable.FL_L0_0);
-        System.out.println(a.size());
-        Object[][] data = new Object[sql.queryToDB(query, r.get(0)).size()][r.size()];
-
-        for(int j = 0; j < r.size(); j++) {
-            Object[] res = sql.queryToDB(query, r.get(j)).toArray();
-
-            for(int i = 0; i < res.length; i++) {
-                data[i][j] = res[i];
-            }
+        for(int i = 0; i < r.size(); i++) {
+            dati[i] = sql.queryToDB(query, r.get(i)).toArray(new String[0]);
         }
         
-
-        // Column names
-        //String[] columnNames = {"First Name", "Last Name", "Age"};
-
-        // Create a table model
-        DefaultTableModel model = new DefaultTableModel(data, r.toArray());
-
-        // Create the JTable
-        JTable jTable = new JTable(model);
-
-        // Add the table to a scroll pane
-        JScrollPane scrollPane = new JScrollPane(jTable);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
-        // Add the scroll pane to the frame
-        pnl_Button.add(scrollPane);
+        pnl_Button.add(new Tabella(r, dati));
     }
 }
