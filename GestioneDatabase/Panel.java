@@ -75,6 +75,7 @@ public class Panel extends JPanel implements DocumentListener{
 
 
         for(int i = 0; i < r.size(); i++) {
+            System.out.println(r.get(i));
             pnl_Button.add(new Button(150, 150, r.get(i), this, FinalVariable.BOTT_TAB));
         }
 
@@ -188,7 +189,7 @@ public class Panel extends JPanel implements DocumentListener{
             }
 
             if(nomeTabOk && pkOk) {
-            String query = "CREATE TABLE " + nomeTab.getText() + " (";
+            String query = "CREATE TABLE " + nomeTab.getText().toLowerCase() + " (";
             boolean virgola = false;
             String pks = "PRIMARY KEY(";
 
@@ -295,14 +296,23 @@ public class Panel extends JPanel implements DocumentListener{
         pnl_Button.setLayout(FinalVariable.FL_C20_20);
         lbl_titolo.setText("TABELLA: " + nomeTab.toUpperCase());
 
-        r = sql.getColumns(nomeTab);
+        System.out.println("A" + nomeTab);
+        
+        pnl_Button.add(new Tabella(nomeTab, sql, this));
+    }
+
+    public String[][] getDataFromTab(String nomeTab) {
         String query = "SELECT * FROM " + nomeTab;
         String[][] dati = new String[r.size()][sql.queryToDB(query, r.get(0)).size()];
 
         for(int i = 0; i < r.size(); i++) {
             dati[i] = sql.queryToDB(query, r.get(i)).toArray(new String[0]);
         }
-        
-        pnl_Button.add(new Tabella(r, dati));
+
+        return dati;
+    }
+
+    public ArrayList<String> getNomeColonne(String nomeTab) {
+        return sql.getColumns(nomeTab);
     }
 }

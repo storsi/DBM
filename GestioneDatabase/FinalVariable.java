@@ -24,12 +24,13 @@ public class FinalVariable {
     public static final int CREA_TAB = 0, CANC_TAB = 1, ELIM_NUOVA_COLONNA = 5;
     public static final int BOTT_TAB = 3, BOTT_DB = 4, BOTT_AGG_TAB = 7, BOTT_AGG_DB = 8;
 
-    public static final int BTN_ELIMINA = 0, BTN_MODIFICA = 1;
+    public static final int BTN_ELIMINA = 0, BTN_MODIFICA = 1, BTN_OK = 2, BTN_CANC = 3;
 
     //COLORI
     public static final Color ERROR_COLOR = new Color(233, 116, 81);
     public static final Color CELLA_COLONNA = Color.YELLOW;
     public static final Color CELLA_DATO = Color.WHITE;
+    public static final Color CELLA_MODIFICA = new Color(176,224,230);
 
     //LAYOUT
     public static final FlowLayout FL_C20_20 = new FlowLayout(FlowLayout.CENTER, 20, 20);
