@@ -75,7 +75,6 @@ public class Panel extends JPanel implements DocumentListener{
 
 
         for(int i = 0; i < r.size(); i++) {
-            System.out.println(r.get(i));
             pnl_Button.add(new Button(150, 150, r.get(i), this, FinalVariable.BOTT_TAB));
         }
 
@@ -206,8 +205,6 @@ public class Panel extends JPanel implements DocumentListener{
 
             query += pks + "));";
             sql.addTab(query);
-
-            System.out.println(query);
         }
 
         mostraTabelle();
@@ -301,10 +298,10 @@ public class Panel extends JPanel implements DocumentListener{
 
     public String[][] getDataFromTab(String nomeTab, ArrayList<String> nomeColonne) {
         String query = "SELECT * FROM " + nomeTab;
-        String[][] dati = new String[r.size()][sql.queryToDB(query, nomeColonne.get(0)).size()];
+        String[][] dati = new String[r.size()][sql.select(query, nomeColonne.get(0)).size()];
 
         for(int i = 0; i < r.size(); i++) {
-            dati[i] = sql.queryToDB(query, nomeColonne.get(i)).toArray(new String[0]);
+            dati[i] = sql.select(query, nomeColonne.get(i)).toArray(new String[0]);
         }
 
         return dati;

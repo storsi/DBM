@@ -25,7 +25,7 @@ public class FinalVariable {
     public static final int BOTT_TAB = 3, BOTT_DB = 4, BOTT_AGG_TAB = 7, BOTT_AGG_DB = 8;
 
     public static final int BTN_ELIMINA = 0, BTN_MODIFICA = 1, BTN_OK = 2, BTN_CANC = 3, BTN_AGGIUNGI = 4;
-    public static final int NO_RIGA = -1;
+    public static final int BTN_INDIETRO = 5, BTN_ELIMINA_TAB = 6; 
 
     //COLORI
     public static final Color ERROR_COLOR = new Color(233, 116, 81);

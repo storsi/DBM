@@ -1,7 +1,9 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Image;
@@ -28,25 +30,37 @@ public class Tabella extends JPanel{
     private String nomeTab;
     private SqLite sql;
     private Panel panel;
+    private int w, h;
+    private JPanel pnl_tabella, pnl_opzioni;
+    private JLabel lbl_errore;
     
     public Tabella(String nomeTab, SqLite sql, Panel panel) {
+        setLayout(new BorderLayout(0, 20));
+
         this.nomeColonne = panel.getNomeColonne(nomeTab);
         this.nomeTab = nomeTab;
         this.sql = sql;
         this.panel = panel;
 
-        int w = (int)(FinalVariable.PANEL_WIDTH * 0.8);
-        int h = (int)(FinalVariable.PANEL_HEIGHT * 0.8);
+        pnl_tabella = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
+        pnl_opzioni = new JPanel(FinalVariable.FL_L10_10);
+
+        w = (int)(FinalVariable.PANEL_WIDTH * 0.7);
+        h = (int)(FinalVariable.PANEL_HEIGHT * 0.7);
 
         dimCasellaVuota = new Dimension(h / 8 + 5, h / 16);
         dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), h / 16);
         
         creaTabella();
 
-        setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati.length + 1)));
-        setMaximumSize(new Dimension(w, h));
-        setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));
-        setBackground(Color.BLACK);
+        pnl_tabella.setBackground(Color.BLACK);
+
+        pnl_opzioni.setPreferredSize(new Dimension(w, 50));
+        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_INDIETRO, panel));
+        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_ELIMINA_TAB, panel));
+
+        add(pnl_opzioni, BorderLayout.NORTH);
+        add(pnl_tabella, BorderLayout.CENTER);
     }
 
     private void creaTabella() {
@@ -56,29 +70,37 @@ public class Tabella extends JPanel{
         dati = panel.getDataFromTab(nomeTab, nomeColonne);
         Casella cas;
 
-        caselleTabella = new Casella[dati[0].length + 1][dati.length + 1];
+        System.out.println("DATI:LENGTH: " + dati[0].length);
+        System.out.println("H: " + ((h / 16 + 4) * (dati[0].length + 2)));
 
-        add(new Casella(dimCasellaVuota));
+        pnl_tabella.setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati[0].length + 2)));
+        pnl_tabella.setMaximumSize(new Dimension(w, h));
+
+        caselleTabella = new Casella[dati[0].length + 1][nomeColonne.size() + 1];
+
+        pnl_tabella.add(new Casella(dimCasellaVuota));
         for(int i = 0; i < nomeColonne.size(); i++) {
-            add(new Casella(nomeColonne.get(i), dimCasella, FinalVariable.CELLA_COLONNA));
+            pnl_tabella.add(new Casella(nomeColonne.get(i), dimCasella, FinalVariable.CELLA_COLONNA));
         }
 
         //Aggiunta dati
-        for(int i = 0; i < dati[0].length + 1; i++) {
+        for(int i = 0; i < caselleTabella.length; i++) {
             
             if(i < dati[0].length) cas = new Casella(i, dimCasellaVuota, this, FinalVariable.NOT_BTN_AGGIUNGI);
             else cas = new Casella(dati[0].length, dimCasellaVuota, this, FinalVariable.IS_BTN_AGGIUNGI);
             
             caselleTabella[i][0] = cas;
-            add(cas);
+            pnl_tabella.add(cas);
             
-            for(int j = 1; j < dati.length + 1; j++) {
+            for(int j = 1; j < caselleTabella[i].length; j++) {
                 
                 if(i < dati[0].length) cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
                 else cas = new Casella("", dimCasella, FinalVariable.CELLA_DATO);
+
+                System.out.println();
                 
                 caselleTabella[i][j] = cas;
-                add(cas);
+                pnl_tabella.add(cas);
             }
         }
     }
@@ -111,11 +133,10 @@ public class Tabella extends JPanel{
             else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
 
             if(i < nomeColonne.size() - 1) query += " AND ";
-            else query += " ";
+            else query += ";";
         }
 
-        System.out.println(query);
-        //sql.
+        sql.delete(query);
         
         creaTabella();
     }
@@ -142,12 +163,12 @@ public class Tabella extends JPanel{
                 else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
 
                 if(i < nomeColonne.size() - 1) query += " AND ";
-                else query += " ";
+                else query += ";";
             }
 
-            System.out.println(query);
-            //sql.addToDB(query);
+            sql.update(query + ";");
         }
+
         creaTabella();
     }
 
@@ -169,11 +190,10 @@ public class Tabella extends JPanel{
             else query += caselleTabella[numeroRiga][i + 1].getValoreTa();
 
             if(i < nomeColonne.size() - 1) query += " , ";
-            else query += ")";
+            else query += ");";
         }
 
-        System.out.println(query);
-        //sql.addToDB(query);
+        sql.insert(query);
     }
 }
 
@@ -201,7 +221,7 @@ class Casella extends JPanel{
 
     public Casella(int numRiga, Dimension dim, Tabella tabella, boolean aggiungi) {
         setPreferredSize(dim);
-        Dimension btnDim = new Dimension(25, 25);
+        Dimension btnDim = new Dimension(23, 23);
 
         btn_el = new BottoniCasella(numRiga, FinalVariable.BTN_ELIMINA, tabella, btnDim);
         btn_mod = new BottoniCasella(numRiga, FinalVariable.BTN_MODIFICA, tabella, btnDim);
@@ -299,6 +319,7 @@ class BottoniCasella extends JButton implements ActionListener{
     private int numeroRiga, tipologia;
     private Tabella tabella;
     private Dimension dim;
+    private Panel panel;
 
     public BottoniCasella(int numeroRiga, int tipologia, Tabella tabella, Dimension dim) {
         this.numeroRiga = numeroRiga;
@@ -306,19 +327,38 @@ class BottoniCasella extends JButton implements ActionListener{
         this.tipologia = tipologia;
         this.dim = dim;
 
+        aggiungiIcona();
+
         setPreferredSize(dim);
         addActionListener(this);
-        
+    }
+
+    public BottoniCasella(int tipologia, Panel panel) {
+        this.panel = panel;
+        this.tipologia = tipologia;
+
+        dim = new Dimension(40, 40);
+
+        aggiungiIcona();
+
+        setPreferredSize(dim);
+        addActionListener(this);
+    }
+
+    private void aggiungiIcona() {
         String pathToIcon;
 
         switch (tipologia) {
-            case FinalVariable.BTN_ELIMINA: pathToIcon = "./Icons/trashIcon.png";                
+            case FinalVariable.BTN_ELIMINA:  
+            case FinalVariable.BTN_ELIMINA_TAB: pathToIcon = "./Icons/trashIcon.png"; 
             break;
             case FinalVariable.BTN_MODIFICA: pathToIcon = "./Icons/modifyIcon.png";
             break;
             case FinalVariable.BTN_CANC: pathToIcon = "./Icons/cancIcon.png";
             break;
             case FinalVariable.BTN_AGGIUNGI: pathToIcon = "./Icons/addIcon.png";
+            break;
+            case FinalVariable.BTN_INDIETRO: pathToIcon = "./Icons/backIcon.png";
             break;
             //DEFAULT = btn_ok
             default: pathToIcon = "./Icons/okIcon.png";
@@ -341,6 +381,10 @@ class BottoniCasella extends JButton implements ActionListener{
             case FinalVariable.BTN_CANC: tabella.cancModificaRiga(numeroRiga);
             break;
             case FinalVariable.BTN_AGGIUNGI: tabella.modificaRiga(numeroRiga);
+            break;
+            case FinalVariable.BTN_INDIETRO: panel.mostraTabelle();
+            break;
+            case FinalVariable.BTN_ELIMINA_TAB: 
             break;
             //DEFAULT = btn_ok
             default: tabella.aggiornaRiga(numeroRiga);
