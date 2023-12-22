@@ -23,6 +23,7 @@ public class Tabella extends JPanel{
 
     private Dimension dimCasella, dimCasellaVuota;
     private Casella[][] caselleTabella;
+    private String[][] dati;
     private ArrayList<String> nomeColonne;
     private String nomeTab;
     private SqLite sql;
@@ -34,33 +35,50 @@ public class Tabella extends JPanel{
         this.sql = sql;
         this.panel = panel;
 
-        String[][] dati = panel.getDataFromTab(nomeTab);
-        int w = (int)(FinalVariable.PANEL_WIDTH * 0.8), h = (int)(FinalVariable.PANEL_HEIGHT * 0.8);
+        int w = (int)(FinalVariable.PANEL_WIDTH * 0.8);
+        int h = (int)(FinalVariable.PANEL_HEIGHT * 0.8);
+
         dimCasellaVuota = new Dimension(h / 8 + 5, h / 16);
         dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), h / 16);
-        caselleTabella = new Casella[dati[0].length][dati.length + 1];
-        Casella cas;
+        
+        creaTabella();
 
-        setPreferredSize(new Dimension(w, h / 16 * dati.length + (4 * dati.length + 1)));
+        setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati.length + 1)));
         setMaximumSize(new Dimension(w, h));
         setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));
         setBackground(Color.BLACK);
-        
-        //Aggiunta dei nomi delle colonne
+    }
+
+    private void creaTabella() {
+        removeAll();
+        revalidate();
+
+        dati = panel.getDataFromTab(nomeTab, nomeColonne);
+        Casella cas;
+
+        caselleTabella = new Casella[dati[0].length + 1][dati.length + 1];
+
         add(new Casella(dimCasellaVuota));
         for(int i = 0; i < nomeColonne.size(); i++) {
             add(new Casella(nomeColonne.get(i), dimCasella, FinalVariable.CELLA_COLONNA));
         }
 
         //Aggiunta dati
-        for(int i = 0; i < dati[0].length; i++) {
-            cas = new Casella(i, dimCasellaVuota, this);
+        for(int i = 0; i < dati[0].length + 1; i++) {
+            
+            if(i < dati[0].length) cas = new Casella(i, dimCasellaVuota, this, FinalVariable.NOT_BTN_AGGIUNGI);
+            else cas = new Casella(dati[0].length, dimCasellaVuota, this, FinalVariable.IS_BTN_AGGIUNGI);
+            
             caselleTabella[i][0] = cas;
             add(cas);
+            
             for(int j = 1; j < dati.length + 1; j++) {
-                cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
-                add(cas);
+                
+                if(i < dati[0].length) cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
+                else cas = new Casella("", dimCasella, FinalVariable.CELLA_DATO);
+                
                 caselleTabella[i][j] = cas;
+                add(cas);
             }
         }
     }
@@ -79,12 +97,13 @@ public class Tabella extends JPanel{
 
     public void cancModificaRiga(int numeroRiga) {
         for(int i = 0; i < caselleTabella[0].length; i++) {
-            caselleTabella[numeroRiga][i].visualizza();
+            if(numeroRiga == dati[0].length) caselleTabella[numeroRiga][i].rigaAgg();
+            else caselleTabella[numeroRiga][i].visualizza();
         }
     }
 
     public void eliminaRiga(int numeroRiga) {
-        String query = "DELETE FROM " + nomeTab.toLowerCase() + " WHERE ";
+        String query = "DELETE FROM " + nomeTab + " WHERE ";
         String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
 
         for(int i = 0; i < nomeColonne.size(); i++) {
@@ -96,36 +115,65 @@ public class Tabella extends JPanel{
         }
 
         System.out.println(query);
-
-        panel.apriTabella(nomeTab);
+        //sql.
+        
+        creaTabella();
     }
 
     public void aggiornaRiga(int numeroRiga) {
-        String query = "UPDATE " + nomeTab.toLowerCase() + " SET ";
+        if(numeroRiga == dati[0].length) {
+            aggiungiRiga(numeroRiga);
+        } else {
+            String query = "UPDATE " + nomeTab.toLowerCase() + " SET ";
+            String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
+
+            for(int i = 0; i < nomeColonne.size(); i++) {
+                if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
+                else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreTa();
+
+                if(i < nomeColonne.size() - 1) query += ", ";
+                else query += " ";
+            }
+
+            query += "WHERE ";
+
+            for(int i = 0; i < nomeColonne.size(); i++) {
+                if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
+                else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
+
+                if(i < nomeColonne.size() - 1) query += " AND ";
+                else query += " ";
+            }
+
+            System.out.println(query);
+            //sql.addToDB(query);
+        }
+        creaTabella();
+    }
+
+    public void aggiungiRiga(int numeroRiga) {
+        String query = "INSERT INTO " + nomeTab + " (";
         String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
 
         for(int i = 0; i < nomeColonne.size(); i++) {
-            if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
-            else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreTa();
+            query += nomeColonne.get(i);
 
-            if(i < nomeColonne.size() - 1) query += ", ";
-            else query += " ";
+            if(i < nomeColonne.size() - 1) query += " , ";
+            else query += ")";
         }
 
-        query += "WHERE ";
+        query += " VALUES (";
 
         for(int i = 0; i < nomeColonne.size(); i++) {
-            if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
-            else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
+            if(dataTypes[i].equals("TEXT")) query += "\'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
+            else query += caselleTabella[numeroRiga][i + 1].getValoreTa();
 
-            if(i < nomeColonne.size() - 1) query += " AND ";
-            else query += " ";
+            if(i < nomeColonne.size() - 1) query += " , ";
+            else query += ")";
         }
 
-        //System.out.println(query);
+        System.out.println(query);
         //sql.addToDB(query);
-
-        panel.apriTabella(nomeTab);
     }
 }
 
@@ -134,7 +182,7 @@ class Casella extends JPanel{
     private JLabel lbl;
     private JTextArea ta;
     private Dimension dim;
-    private JButton btn_el, btn_mod, btn_ok, btn_canc;
+    private JButton btn_el, btn_mod, btn_ok, btn_canc, btn_agg;
     private String valore;
 
     public Casella(String valore, Dimension dim, Color backColor) {
@@ -151,7 +199,7 @@ class Casella extends JPanel{
         add(ta);
     }
 
-    public Casella(int numRiga, Dimension dim, Tabella tabella) {
+    public Casella(int numRiga, Dimension dim, Tabella tabella, boolean aggiungi) {
         setPreferredSize(dim);
         Dimension btnDim = new Dimension(25, 25);
 
@@ -159,11 +207,19 @@ class Casella extends JPanel{
         btn_mod = new BottoniCasella(numRiga, FinalVariable.BTN_MODIFICA, tabella, btnDim);
         btn_ok = new BottoniCasella(numRiga, FinalVariable.BTN_OK, tabella, btnDim);
         btn_canc = new BottoniCasella(numRiga, FinalVariable.BTN_CANC, tabella, btnDim);
+        btn_agg = new BottoniCasella(numRiga, FinalVariable.BTN_AGGIUNGI, tabella, btnDim);
+
+        btn_el.setVisible(!aggiungi);
+        btn_mod.setVisible(!aggiungi);
+        btn_ok.setVisible(!aggiungi);
+        btn_canc.setVisible(!aggiungi);
+        btn_agg.setVisible(aggiungi);
 
         add(btn_el);
         add(btn_mod);
         add(btn_canc);
         add(btn_ok);
+        add(btn_agg);
     }
 
     public Casella(Dimension dim) {
@@ -217,6 +273,18 @@ class Casella extends JPanel{
         btn_mod.setEnabled(!disabilita);
     }
 
+    public void rigaAgg() {
+        if(btn_el != null) {
+            btn_canc.setVisible(false);
+            btn_ok.setVisible(false);
+
+            btn_agg.setVisible(true);
+        } else {
+            ta.setVisible(false);
+            lbl.setVisible(true);
+        }
+    }
+
     public String getValoreTa() {
         return ta.getText();
     }
@@ -230,11 +298,13 @@ class BottoniCasella extends JButton implements ActionListener{
 
     private int numeroRiga, tipologia;
     private Tabella tabella;
+    private Dimension dim;
 
     public BottoniCasella(int numeroRiga, int tipologia, Tabella tabella, Dimension dim) {
         this.numeroRiga = numeroRiga;
         this.tabella = tabella;
         this.tipologia = tipologia;
+        this.dim = dim;
 
         setPreferredSize(dim);
         addActionListener(this);
@@ -248,12 +318,15 @@ class BottoniCasella extends JButton implements ActionListener{
             break;
             case FinalVariable.BTN_CANC: pathToIcon = "./Icons/cancIcon.png";
             break;
+            case FinalVariable.BTN_AGGIUNGI: pathToIcon = "./Icons/addIcon.png";
+            break;
+            //DEFAULT = btn_ok
             default: pathToIcon = "./Icons/okIcon.png";
             break;
         }
 
         ImageIcon icon = new ImageIcon(pathToIcon);
-        Image img = icon.getImage().getScaledInstance((int)dim.getWidth() - 1, (int)dim.getHeight() - 1, Image.SCALE_SMOOTH);
+        Image img = icon.getImage().getScaledInstance((int)dim.getWidth() - 3, (int)dim.getHeight() - 3, Image.SCALE_SMOOTH);
 
         setIcon(new ImageIcon(img));
     }
@@ -266,6 +339,8 @@ class BottoniCasella extends JButton implements ActionListener{
             case FinalVariable.BTN_MODIFICA: tabella.modificaRiga(numeroRiga);
             break;
             case FinalVariable.BTN_CANC: tabella.cancModificaRiga(numeroRiga);
+            break;
+            case FinalVariable.BTN_AGGIUNGI: tabella.modificaRiga(numeroRiga);
             break;
             //DEFAULT = btn_ok
             default: tabella.aggiornaRiga(numeroRiga);

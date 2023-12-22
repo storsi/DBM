@@ -24,7 +24,8 @@ public class FinalVariable {
     public static final int CREA_TAB = 0, CANC_TAB = 1, ELIM_NUOVA_COLONNA = 5;
     public static final int BOTT_TAB = 3, BOTT_DB = 4, BOTT_AGG_TAB = 7, BOTT_AGG_DB = 8;
 
-    public static final int BTN_ELIMINA = 0, BTN_MODIFICA = 1, BTN_OK = 2, BTN_CANC = 3;
+    public static final int BTN_ELIMINA = 0, BTN_MODIFICA = 1, BTN_OK = 2, BTN_CANC = 3, BTN_AGGIUNGI = 4;
+    public static final int NO_RIGA = -1;
 
     //COLORI
     public static final Color ERROR_COLOR = new Color(233, 116, 81);
@@ -38,4 +39,7 @@ public class FinalVariable {
     public static final FlowLayout FL_L0_0 = new FlowLayout(FlowLayout.LEFT, 0, 0);
     public static final FlowLayout FL_C2_2 = new FlowLayout(FlowLayout.CENTER, 2, 2);
     
+    //Boolean
+
+    public static final boolean IS_BTN_AGGIUNGI = true, NOT_BTN_AGGIUNGI = false;
 }

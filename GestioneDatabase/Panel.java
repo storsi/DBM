@@ -295,18 +295,16 @@ public class Panel extends JPanel implements DocumentListener{
 
         pnl_Button.setLayout(FinalVariable.FL_C20_20);
         lbl_titolo.setText("TABELLA: " + nomeTab.toUpperCase());
-
-        System.out.println("A" + nomeTab);
         
         pnl_Button.add(new Tabella(nomeTab, sql, this));
     }
 
-    public String[][] getDataFromTab(String nomeTab) {
+    public String[][] getDataFromTab(String nomeTab, ArrayList<String> nomeColonne) {
         String query = "SELECT * FROM " + nomeTab;
-        String[][] dati = new String[r.size()][sql.queryToDB(query, r.get(0)).size()];
+        String[][] dati = new String[r.size()][sql.queryToDB(query, nomeColonne.get(0)).size()];
 
         for(int i = 0; i < r.size(); i++) {
-            dati[i] = sql.queryToDB(query, r.get(i)).toArray(new String[0]);
+            dati[i] = sql.queryToDB(query, nomeColonne.get(i)).toArray(new String[0]);
         }
 
         return dati;
