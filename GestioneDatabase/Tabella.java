@@ -64,14 +64,11 @@ public class Tabella extends JPanel{
     }
 
     private void creaTabella() {
-        removeAll();
-        revalidate();
+        pnl_tabella.removeAll();
+        pnl_tabella.revalidate();
 
         dati = panel.getDataFromTab(nomeTab, nomeColonne);
         Casella cas;
-
-        System.out.println("DATI:LENGTH: " + dati[0].length);
-        System.out.println("H: " + ((h / 16 + 4) * (dati[0].length + 2)));
 
         pnl_tabella.setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati[0].length + 2)));
         pnl_tabella.setMaximumSize(new Dimension(w, h));
@@ -96,13 +93,13 @@ public class Tabella extends JPanel{
                 
                 if(i < dati[0].length) cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
                 else cas = new Casella("", dimCasella, FinalVariable.CELLA_DATO);
-
-                System.out.println();
                 
                 caselleTabella[i][j] = cas;
                 pnl_tabella.add(cas);
             }
         }
+
+        
     }
 
     public void modificaRiga(int numeroRiga) {
