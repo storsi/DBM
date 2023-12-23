@@ -38,6 +38,7 @@ public class FinalVariable {
     public static final FlowLayout FL_L10_10 = new FlowLayout(FlowLayout.LEFT, 10, 10);
     public static final FlowLayout FL_L0_0 = new FlowLayout(FlowLayout.LEFT, 0, 0);
     public static final FlowLayout FL_C2_2 = new FlowLayout(FlowLayout.CENTER, 2, 2);
+    public static final FlowLayout FL_C3_3 = new FlowLayout(FlowLayout.CENTER, 3, 3);
     
     //Boolean
 

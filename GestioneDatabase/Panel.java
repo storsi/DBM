@@ -298,9 +298,9 @@ public class Panel extends JPanel implements DocumentListener{
 
     public String[][] getDataFromTab(String nomeTab, ArrayList<String> nomeColonne) {
         String query = "SELECT * FROM " + nomeTab;
-        String[][] dati = new String[r.size()][sql.select(query, nomeColonne.get(0)).size()];
+        String[][] dati = new String[nomeColonne.size()][sql.select(query, nomeColonne.get(0)).size()];
 
-        for(int i = 0; i < r.size(); i++) {
+        for(int i = 0; i < nomeColonne.size(); i++) {
             dati[i] = sql.select(query, nomeColonne.get(i)).toArray(new String[0]);
         }
 

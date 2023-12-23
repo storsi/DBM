@@ -42,7 +42,7 @@ public class Tabella extends JPanel{
         this.sql = sql;
         this.panel = panel;
 
-        pnl_tabella = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
+        pnl_tabella = new JPanel();
         pnl_opzioni = new JPanel(FinalVariable.FL_L10_10);
 
         w = (int)(FinalVariable.PANEL_WIDTH * 0.7);
@@ -53,45 +53,55 @@ public class Tabella extends JPanel{
         
         creaTabella();
 
-        pnl_tabella.setBackground(Color.BLACK);
-
         pnl_opzioni.setPreferredSize(new Dimension(w, 50));
-        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_INDIETRO, panel));
-        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_ELIMINA_TAB, panel));
+        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_INDIETRO, panel, this));
+        pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_ELIMINA_TAB, panel, this));
 
         add(pnl_opzioni, BorderLayout.NORTH);
         add(pnl_tabella, BorderLayout.CENTER);
     }
 
     private void creaTabella() {
+        //Libera il "campo" per l'aggiunta delle celle per la tabella
         pnl_tabella.removeAll();
-        pnl_tabella.revalidate();
 
+        pnl_tabella.setLayout(FinalVariable.FL_C3_3);
+        pnl_tabella.setBackground(Color.BLACK);
+
+        //Ottenere le colonne della tabella
+        nomeColonne = panel.getNomeColonne(nomeTab);
+
+        //Ottenere i dati presenti nelle colonne (dati[0] -> dati di una colonna; dati -> colonne)
         dati = panel.getDataFromTab(nomeTab, nomeColonne);
+
+        //Creazione variabile d'appoggio
         Casella cas;
 
+        //Creazione matrice che conterrà tutte le caselle che comporranno la tabella (stesso pattern dei dati)
+        caselleTabella = new Casella[dati[0].length + 1][dati.length + 1];
+
+        //Inserimento delle dimensioni per il JPanel che conterrà le celle
         pnl_tabella.setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati[0].length + 2)));
         pnl_tabella.setMaximumSize(new Dimension(w, h));
 
-        caselleTabella = new Casella[dati[0].length + 1][nomeColonne.size() + 1];
-
+        //Inserimento del nome delle colonne (+ spazio vuoto iniziale)
         pnl_tabella.add(new Casella(dimCasellaVuota));
-        for(int i = 0; i < nomeColonne.size(); i++) {
-            pnl_tabella.add(new Casella(nomeColonne.get(i), dimCasella, FinalVariable.CELLA_COLONNA));
+        for(int i = 1; i < caselleTabella[0].length; i++) {
+            pnl_tabella.add(new Casella(nomeColonne.get(i - 1), dimCasella, FinalVariable.CELLA_COLONNA));
         }
 
-        //Aggiunta dati
+        //Inserimento dei dati (+ bottoni per la gestione delle righe e la loro aggiunta)
         for(int i = 0; i < caselleTabella.length; i++) {
-            
-            if(i < dati[0].length) cas = new Casella(i, dimCasellaVuota, this, FinalVariable.NOT_BTN_AGGIUNGI);
+            //I indica la colonna della tabella
+            if(i < caselleTabella.length - 1) cas = new Casella(i, dimCasellaVuota, this, FinalVariable.NOT_BTN_AGGIUNGI);
             else cas = new Casella(dati[0].length, dimCasellaVuota, this, FinalVariable.IS_BTN_AGGIUNGI);
             
             caselleTabella[i][0] = cas;
             pnl_tabella.add(cas);
             
             for(int j = 1; j < caselleTabella[i].length; j++) {
-                
-                if(i < dati[0].length) cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
+                //J indica la riga della tabella
+                if(i < caselleTabella.length - 1) cas = new Casella(dati[j - 1][i], dimCasella, FinalVariable.CELLA_DATO);
                 else cas = new Casella("", dimCasella, FinalVariable.CELLA_DATO);
                 
                 caselleTabella[i][j] = cas;
@@ -99,7 +109,7 @@ public class Tabella extends JPanel{
             }
         }
 
-        
+        pnl_tabella.validate();
     }
 
     public void modificaRiga(int numeroRiga) {
@@ -118,6 +128,10 @@ public class Tabella extends JPanel{
         for(int i = 0; i < caselleTabella[0].length; i++) {
             if(numeroRiga == dati[0].length) caselleTabella[numeroRiga][i].rigaAgg();
             else caselleTabella[numeroRiga][i].visualizza();
+        }
+
+        for(int i = 0; i < caselleTabella.length; i++) {
+            if(i != numeroRiga) caselleTabella[i][0].disabilita(false);
         }
     }
 
@@ -163,7 +177,7 @@ public class Tabella extends JPanel{
                 else query += ";";
             }
 
-            sql.update(query + ";");
+            sql.update(query);
         }
 
         creaTabella();
@@ -191,6 +205,11 @@ public class Tabella extends JPanel{
         }
 
         sql.insert(query);
+    }
+
+    public void dropTable() {
+        sql.dropTable(nomeTab);
+        panel.mostraTabelle();
     }
 }
 
@@ -288,6 +307,7 @@ class Casella extends JPanel{
     public void disabilita(boolean disabilita) {
         btn_el.setEnabled(!disabilita);
         btn_mod.setEnabled(!disabilita);
+        btn_agg.setEnabled(!disabilita);
     }
 
     public void rigaAgg() {
@@ -330,9 +350,10 @@ class BottoniCasella extends JButton implements ActionListener{
         addActionListener(this);
     }
 
-    public BottoniCasella(int tipologia, Panel panel) {
+    public BottoniCasella(int tipologia, Panel panel, Tabella tabella) {
         this.panel = panel;
         this.tipologia = tipologia;
+        this.tabella = tabella;
 
         dim = new Dimension(40, 40);
 
@@ -381,7 +402,7 @@ class BottoniCasella extends JButton implements ActionListener{
             break;
             case FinalVariable.BTN_INDIETRO: panel.mostraTabelle();
             break;
-            case FinalVariable.BTN_ELIMINA_TAB: 
+            case FinalVariable.BTN_ELIMINA_TAB: tabella.dropTable();
             break;
             //DEFAULT = btn_ok
             default: tabella.aggiornaRiga(numeroRiga);
