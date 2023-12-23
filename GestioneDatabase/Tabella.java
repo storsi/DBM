@@ -64,6 +64,8 @@ public class Tabella extends JPanel{
     private void creaTabella() {
         //Libera il "campo" per l'aggiunta delle celle per la tabella
         pnl_tabella.removeAll();
+        pnl_tabella.validate();
+        pnl_tabella.repaint();
 
         pnl_tabella.setLayout(FinalVariable.FL_C3_3);
         pnl_tabella.setBackground(Color.BLACK);
@@ -110,6 +112,9 @@ public class Tabella extends JPanel{
         }
 
         pnl_tabella.validate();
+
+        //Non ho capito il motivo, ma serve questa riga, come per refreshare il contenuto, sennò non si aggiorna
+        cancModificaRiga(0);
     }
 
     public void modificaRiga(int numeroRiga) {
@@ -205,6 +210,8 @@ public class Tabella extends JPanel{
         }
 
         sql.insert(query);
+
+        creaTabella();
     }
 
     public void dropTable() {
