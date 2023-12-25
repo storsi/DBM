@@ -1,13 +1,10 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Image;
-
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -23,7 +20,7 @@ public class Tabella extends JPanel{
     //DATI.LENGTH INDICA LA QUANTITÀ DI DATI DI OGNI RIGA
     //DATI[0].LENGTH INDICA LA QUANTITÀ DI DATI PER OGNI COLONNA
 
-    private Dimension dimCasella, dimCasellaVuota;
+    private Dimension dimCasella, dimCasellaVuota, dimColonna;
     private Casella[][] caselleTabella;
     private String[][] dati;
     private ArrayList<String> nomeColonne;
@@ -47,9 +44,9 @@ public class Tabella extends JPanel{
 
         w = (int)(FinalVariable.PANEL_WIDTH * 0.7);
         h = (int)(FinalVariable.PANEL_HEIGHT * 0.7);
-
-        dimCasellaVuota = new Dimension(h / 8 + 5, h / 16);
-        dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), h / 16);
+        dimCasellaVuota = new Dimension((int)Math.round(h / 8.0) + 5, (int)Math.round(h / 16.0));
+        dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), (int)Math.round(h / 16.0));
+        dimColonna = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), (int)Math.round(h / 10.0));
         
         creaTabella();
 
@@ -83,13 +80,14 @@ public class Tabella extends JPanel{
         caselleTabella = new Casella[dati[0].length + 1][dati.length + 1];
 
         //Inserimento delle dimensioni per il JPanel che conterrà le celle
-        pnl_tabella.setPreferredSize(new Dimension(w, (h / 16 + 4) * (dati[0].length + 2)));
+        //pnl_tabella.setPreferredSize(new Dimension(w, (h / 16 + 1) * (caselleTabella.length + 2)));
+        pnl_tabella.setPreferredSize(new Dimension(w, 6 + (int)dimColonna.getHeight() + (3 + (int)dimCasella.getHeight()) * (dati[0].length + 1)));
         pnl_tabella.setMaximumSize(new Dimension(w, h));
 
         //Inserimento del nome delle colonne (+ spazio vuoto iniziale)
-        pnl_tabella.add(new Casella(dimCasellaVuota));
+        pnl_tabella.add(new Casella(new Dimension((int)(dimCasellaVuota.getWidth()), (int)(dimColonna.getHeight()))));
         for(int i = 1; i < caselleTabella[0].length; i++) {
-            pnl_tabella.add(new Casella(nomeColonne.get(i - 1), dimCasella, FinalVariable.CELLA_COLONNA));
+            pnl_tabella.add(new Casella(nomeColonne.get(i - 1), getDataTypes(i - 1), dimColonna, FinalVariable.CELLA_COLONNA));
         }
 
         //Inserimento dei dati (+ bottoni per la gestione delle righe e la loro aggiunta)
@@ -115,6 +113,16 @@ public class Tabella extends JPanel{
 
         //Non ho capito il motivo, ma serve questa riga, come per refreshare il contenuto, sennò non si aggiorna
         cancModificaRiga(0);
+    }
+
+    private String getDataTypes(int riga) {
+        String colonna = nomeColonne.get(riga), risultato = "(";
+
+        if(sql.isPk(nomeTab, colonna)) risultato += "PRIMARY KEY, ";
+        if(sql.isAutoIn(nomeTab, colonna)) risultato += "AUTOINCREMENT, ";
+        risultato += sql.getDataTypes(nomeTab).toArray(new String[0])[riga] + ")";
+
+        return risultato;
     }
 
     public void modificaRiga(int numeroRiga) {
@@ -222,24 +230,35 @@ public class Tabella extends JPanel{
 
 class Casella extends JPanel{
 
-    private JLabel lbl;
+    private JLabel lbl, lbl_info;
     private JTextArea ta;
     private Dimension dim;
     private JButton btn_el, btn_mod, btn_ok, btn_canc, btn_agg;
-    private String valore;
 
     public Casella(String valore, Dimension dim, Color backColor) {
         this.dim = dim;
-        this.valore = valore;
 
         setPreferredSize(dim);
         setLayout(FinalVariable.FL_C2_2);
 
         creaTa(valore);
-        creaLbl(valore, backColor);
+        lbl = creaLbl(valore, dim, new Font("Courier", Font.PLAIN, 20), backColor);
 
         add(lbl);
         add(ta);
+    }
+
+    public Casella(String valore, String dataTypes, Dimension dim, Color backColor) {
+        this.dim = dim;
+
+        setPreferredSize(dim);
+        setLayout(FinalVariable.FL_L0_0);
+
+        lbl = creaLbl(valore, new Dimension((int)(dim.getWidth()), (int)(dim.getHeight() * 0.5)), new Font("Courier", Font.PLAIN, 20), backColor);
+        lbl_info = creaLbl(dataTypes, new Dimension((int)(dim.getWidth()), (int)(dim.getHeight() * 0.5)), new Font("Courier", Font.PLAIN, 15), backColor);
+
+        add(lbl);
+        add(lbl_info);
     }
 
     public Casella(int numRiga, Dimension dim, Tabella tabella, boolean aggiungi) {
@@ -269,13 +288,16 @@ class Casella extends JPanel{
         setPreferredSize(dim);
     }
 
-    private void creaLbl(String valore, Color backColor) {
-        lbl = new JLabel(valore.toUpperCase(), SwingConstants.CENTER);
+    private JLabel creaLbl(String valore, Dimension dim, Font font, Color backColor) {
+        JLabel lbl = new JLabel(valore.toUpperCase(), SwingConstants.CENTER);
         lbl.setVerticalAlignment(SwingConstants.TOP);
         lbl.setPreferredSize(dim);
-        lbl.setFont(new Font("Courier", Font.PLAIN, 20));
+        lbl.setFont(font);
         lbl.setOpaque(true);
         lbl.setBackground(backColor);
+        
+
+        return lbl;
     }
 
     private void creaTa(String valore) {
