@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Image;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -23,7 +22,7 @@ public class Tabella extends JPanel{
     private Dimension dimCasella, dimCasellaVuota, dimColonna;
     private Casella[][] caselleTabella;
     private String[][] dati;
-    private ArrayList<String> nomeColonne;
+    private String[] nomeColonne;
     private String nomeTab;
     private SqLite sql;
     private Panel panel;
@@ -41,18 +40,24 @@ public class Tabella extends JPanel{
 
         pnl_tabella = new JPanel();
         pnl_opzioni = new JPanel(FinalVariable.FL_L10_10);
+        pnl_opzioni.setPreferredSize(new Dimension(w, 50));
+        
 
         w = (int)(FinalVariable.PANEL_WIDTH * 0.7);
         h = (int)(FinalVariable.PANEL_HEIGHT * 0.7);
         dimCasellaVuota = new Dimension((int)Math.round(h / 8.0) + 5, (int)Math.round(h / 16.0));
-        dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), (int)Math.round(h / 16.0));
-        dimColonna = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.size() + 2) * 3)) / nomeColonne.size(), (int)Math.round(h / 10.0));
+        dimCasella = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.length + 2) * 3)) / nomeColonne.length, (int)Math.round(h / 16.0));
+        dimColonna = new Dimension((w - (int)dimCasellaVuota.getWidth() - ((nomeColonne.length + 2) * 3)) / nomeColonne.length, (int)Math.round(h / 10.0));
         
         creaTabella();
 
-        pnl_opzioni.setPreferredSize(new Dimension(w, 50));
+        
+        lbl_errore = new JLabel();
+        lbl_errore.setForeground(Color.RED);
+
         pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_INDIETRO, panel, this));
         pnl_opzioni.add(new BottoniCasella(FinalVariable.BTN_ELIMINA_TAB, panel, this));
+        pnl_opzioni.add(lbl_errore);
 
         add(pnl_opzioni, BorderLayout.NORTH);
         add(pnl_tabella, BorderLayout.CENTER);
@@ -87,7 +92,7 @@ public class Tabella extends JPanel{
         //Inserimento del nome delle colonne (+ spazio vuoto iniziale)
         pnl_tabella.add(new Casella(new Dimension((int)(dimCasellaVuota.getWidth()), (int)(dimColonna.getHeight()))));
         for(int i = 1; i < caselleTabella[0].length; i++) {
-            pnl_tabella.add(new Casella(nomeColonne.get(i - 1), getDataTypes(i - 1), dimColonna, FinalVariable.CELLA_COLONNA));
+            pnl_tabella.add(new Casella(nomeColonne[i - 1], getDataTypes(i - 1), dimColonna, FinalVariable.CELLA_COLONNA));
         }
 
         //Inserimento dei dati (+ bottoni per la gestione delle righe e la loro aggiunta)
@@ -116,11 +121,11 @@ public class Tabella extends JPanel{
     }
 
     private String getDataTypes(int riga) {
-        String colonna = nomeColonne.get(riga), risultato = "(";
+        String colonna = nomeColonne[riga], risultato = "(";
 
         if(sql.isPk(nomeTab, colonna)) risultato += "PRIMARY KEY, ";
         if(sql.isAutoIn(nomeTab, colonna)) risultato += "AUTOINCREMENT, ";
-        risultato += sql.getDataTypes(nomeTab).toArray(new String[0])[riga] + ")";
+        risultato += sql.getDataTypes(nomeTab)[riga] + ")";
 
         return risultato;
     }
@@ -129,7 +134,7 @@ public class Tabella extends JPanel{
 
         caselleTabella[numeroRiga][0].modifica();
         for(int i = 1; i < caselleTabella[0].length; i++) {
-            if(!sql.isAutoIn(nomeTab, nomeColonne.get(i - 1))) caselleTabella[numeroRiga][i].modifica();
+            if(!sql.isAutoIn(nomeTab, nomeColonne[i - 1])) caselleTabella[numeroRiga][i].modifica();
         }
 
         for(int i = 0; i < caselleTabella.length; i++) {
@@ -148,83 +153,99 @@ public class Tabella extends JPanel{
         }
     }
 
+    public void prosegui(int numeroRiga) {
+        if(numeroRiga == dati[0].length) aggiungiRiga(numeroRiga);
+        else aggiornaRiga(numeroRiga);
+    }
+
     public void eliminaRiga(int numeroRiga) {
         String query = "DELETE FROM " + nomeTab + " WHERE ";
-        String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
+        String[] dataTypes = sql.getDataTypes(nomeTab);
 
-        for(int i = 0; i < nomeColonne.size(); i++) {
-            if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
-            else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
+        for(int i = 0; i < nomeColonne.length; i++) {
+            if(dataTypes[i].equals("TEXT")) query += nomeColonne[i] + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
+            else query += nomeColonne[i] + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
 
-            if(i < nomeColonne.size() - 1) query += " AND ";
+            if(i < nomeColonne.length - 1) query += " AND ";
             else query += ";";
         }
 
-        sql.delete(query);
-        
+        controlloErrori(sql.delete(query));
         creaTabella();
     }
 
     public void aggiornaRiga(int numeroRiga) {
-        if(numeroRiga == dati[0].length) {
-            aggiungiRiga(numeroRiga);
-        } else {
-            String query = "UPDATE " + nomeTab.toLowerCase() + " SET ";
-            String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
+        String query = "UPDATE " + nomeTab.toLowerCase() + " SET ";
+        String[] dataTypes = sql.getDataTypes(nomeTab);
 
-            for(int i = 0; i < nomeColonne.size(); i++) {
-                if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
-                else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreTa();
+        for(int i = 0; i < nomeColonne.length; i++) {
+            if(dataTypes[i].equals("TEXT")) query += nomeColonne[i] + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
+            else query += nomeColonne[i] + " = " + caselleTabella[numeroRiga][i + 1].getValoreTa();
 
-                if(i < nomeColonne.size() - 1) query += ", ";
-                else query += " ";
-            }
-
-            query += "WHERE ";
-
-            for(int i = 0; i < nomeColonne.size(); i++) {
-                if(dataTypes[i].equals("TEXT")) query += nomeColonne.get(i) + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
-                else query += nomeColonne.get(i) + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
-
-                if(i < nomeColonne.size() - 1) query += " AND ";
-                else query += ";";
-            }
-
-            sql.update(query);
+            if(i < nomeColonne.length - 1) query += ", ";
+            else query += " ";
         }
+
+        query += "WHERE ";
+
+        for(int i = 0; i < nomeColonne.length; i++) {
+            if(dataTypes[i].equals("TEXT")) query += nomeColonne[i] + " = \'" + caselleTabella[numeroRiga][i + 1].getValoreLbl() + "\'";
+            else query += nomeColonne[i] + " = " + caselleTabella[numeroRiga][i + 1].getValoreLbl();
+
+            if(i < nomeColonne.length - 1) query += " AND ";
+            else query += ";";
+        }
+
+        controlloErrori(sql.update(query));
 
         creaTabella();
     }
 
     public void aggiungiRiga(int numeroRiga) {
         String query = "INSERT INTO " + nomeTab + " (";
-        String[] dataTypes = sql.getDataTypes(nomeTab).toArray(new String[0]);
+        String[] dataTypes = sql.getDataTypes(nomeTab);
 
-        for(int i = 0; i < nomeColonne.size(); i++) {
-            query += nomeColonne.get(i);
+        for(int i = 0; i < nomeColonne.length; i++) {
+            query += nomeColonne[i];
 
-            if(i < nomeColonne.size() - 1) query += " , ";
+            if(i < nomeColonne.length - 1) query += " , ";
             else query += ")";
         }
 
         query += " VALUES (";
 
-        for(int i = 0; i < nomeColonne.size(); i++) {
+        for(int i = 0; i < nomeColonne.length; i++) {
             if(dataTypes[i].equals("TEXT")) query += "\'" + caselleTabella[numeroRiga][i + 1].getValoreTa() + "\'";
             else query += caselleTabella[numeroRiga][i + 1].getValoreTa();
 
-            if(i < nomeColonne.size() - 1) query += " , ";
+            if(i < nomeColonne.length - 1) query += " , ";
             else query += ");";
         }
 
-        sql.insert(query);
-
+        controlloErrori(sql.insert(query));
         creaTabella();
     }
 
     public void dropTable() {
         sql.dropTable(nomeTab);
         panel.mostraTabelle();
+    }
+
+    private void controlloErrori(int valore) {
+        switch (valore) {
+            case SqLite.GENERAL_EXCEPTION:
+                lbl_errore.setText("ERRORE NELL'ESECUZIONE");
+                break;
+            case SqLite.INTEGRITY_EXCEPTION: 
+                lbl_errore.setText("ERRORE CAUSATO DALLA VIOLAZIONE DEI VINCOLI DI INTEGRITÀ");
+                break;
+            case SqLite.SYNTAX_EXCEPTION:
+                lbl_errore.setText("ERRORE DI SINTASSI DELLA QUERY");
+                break;
+            default: 
+                lbl_errore.setText("");
+                break;
+        }
     }
 }
 
@@ -434,7 +455,7 @@ class BottoniCasella extends JButton implements ActionListener{
             case FinalVariable.BTN_ELIMINA_TAB: tabella.dropTable();
             break;
             //DEFAULT = btn_ok
-            default: tabella.aggiornaRiga(numeroRiga);
+            default: tabella.prosegui(numeroRiga);
             break;
         }
     }

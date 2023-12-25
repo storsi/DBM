@@ -22,7 +22,7 @@ public class Panel extends JPanel implements DocumentListener{
     private SqLite sql;
     private String dbScelto, nomeTabella;
     private JLabel lbl_titolo, lbl_numColValide;
-    private ArrayList<String> r;
+    private String[] r;
     private ArrayList<AggColonna> arrAc;
     private JPanel pnl_Button;
     private Button btn_creaTab;
@@ -74,8 +74,8 @@ public class Panel extends JPanel implements DocumentListener{
         lbl_titolo.setText("TABELLE DEL DATABASE: " + dbScelto.toUpperCase());
 
 
-        for(int i = 0; i < r.size(); i++) {
-            pnl_Button.add(new Button(150, 150, r.get(i), this, FinalVariable.BOTT_TAB));
+        for(int i = 0; i < r.length; i++) {
+            pnl_Button.add(new Button(150, 150, r[i], this, FinalVariable.BOTT_TAB));
         }
 
         pnl_Button.add(new Button(150, 150, "<html>aggiungi<br>tabella</html>", this, FinalVariable.BOTT_AGG_TAB));
@@ -175,8 +175,8 @@ public class Panel extends JPanel implements DocumentListener{
 
         if(!nomeTab.getText().equals("") && nomeTab.getText() != null) {
             //controlla che non esista già una tabella con quel nome
-            for(int i = 0; i < r.size(); i++) {
-                if(nomeTab.getText().toLowerCase().equals(r.get(i).toLowerCase())) nomeTabOk = false;
+            for(int i = 0; i < r.length; i++) {
+                if(nomeTab.getText().toLowerCase().equals(r[i].toLowerCase())) nomeTabOk = false;
             }
 
             //Controlla che ci sia almeno una pk
@@ -296,18 +296,18 @@ public class Panel extends JPanel implements DocumentListener{
         pnl_Button.add(new Tabella(nomeTab, sql, this));
     }
 
-    public String[][] getDataFromTab(String nomeTab, ArrayList<String> nomeColonne) {
+    public String[][] getDataFromTab(String nomeTab, String[] nomeColonne) {
         String query = "SELECT * FROM " + nomeTab;
-        String[][] dati = new String[nomeColonne.size()][sql.select(query, nomeColonne.get(0)).size()];
+        String[][] dati = new String[nomeColonne.length][sql.select(query, nomeColonne[0]).length];
 
-        for(int i = 0; i < nomeColonne.size(); i++) {
-            dati[i] = sql.select(query, nomeColonne.get(i)).toArray(new String[0]);
+        for(int i = 0; i < nomeColonne.length; i++) {
+            dati[i] = sql.select(query, nomeColonne[i]);
         }
 
         return dati;
     }
 
-    public ArrayList<String> getNomeColonne(String nomeTab) {
+    public String[] getNomeColonne(String nomeTab) {
         return sql.getColumns(nomeTab);
     }
 }

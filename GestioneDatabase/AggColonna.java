@@ -108,6 +108,7 @@ public class AggColonna extends JPanel implements DocumentListener, ActionListen
     public String toString() {
 
         String result = ta.getText() + " " + bg.getSelection().getActionCommand();
+        if(pk.isSelected()) result += " UNIQUE ";
         if(notNull.isSelected() && !pk.isSelected()) result += " NOT NULL";
 
         result += ", ";
