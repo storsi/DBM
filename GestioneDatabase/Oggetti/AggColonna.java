@@ -136,7 +136,7 @@ public class AggColonna extends JPanel implements DocumentListener, ActionListen
 
     @Override
     public void insertUpdate(DocumentEvent e) {
-        panel.setBtnEnable(true);
+        //panel.setBtnEnable(true);
         if(maxNumCar <= 0) {
             SwingUtilities.invokeLater(() -> {
                 String t = ta.getText();
@@ -151,7 +151,7 @@ public class AggColonna extends JPanel implements DocumentListener, ActionListen
     @Override
     public void removeUpdate(DocumentEvent e) {
         maxNumCar++;
-        if(maxNumCar == FinalVariable.MAX_LENGTH) panel.setBtnEnable(false);
+        if(maxNumCar == FinalVariable.MAX_LENGTH) //panel.setBtnEnable(false);
 
         checkTextArea();
     }
@@ -167,7 +167,7 @@ public class AggColonna extends JPanel implements DocumentListener, ActionListen
     public void actionPerformed(ActionEvent e) {
 
         if(autoIn.isSelected() && !isAutoIn) {
-            if(!panel.altriAutoIn(this)) autoIn.setSelected(false);
+            if(!panel.altriAutoIn(this)); //autoIn.setSelected(false);
             else {
                 isAutoIn = true;
                 pk.setSelected(true);

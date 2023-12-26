@@ -29,10 +29,9 @@ public class Button extends JButton implements ActionListener{
 
     }
 
-    public Button(int width, int height, String text, Panel panel, int utilizzo, CreazioneTabella ct) {
+    public Button(int width, int height, String text, CreazioneTabella ct, int utilizzo) {
         this.text = text;
         this.utilizzo = utilizzo;
-        this.panel = panel;
         this.ct = ct;
 
         setText(text.toUpperCase());
@@ -62,7 +61,7 @@ public class Button extends JButton implements ActionListener{
             break;
             case FinalVariable.CANC_TAB: panel.mostraTabelle();
             break;
-            case FinalVariable.AGG_COLONNA: ct.aggiungiColonnaTab();
+            case FinalVariable.AGG_COLONNA: ct.aggiungiColonna();
             break;
             case FinalVariable.BOTT_TAB: panel.apriTabella(text);
             break;

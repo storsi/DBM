@@ -120,12 +120,12 @@ public class Panel extends JPanel implements DocumentListener{
     private void creaPaginaAggiuntaCol() {
         remAll(pnl_Button);
 
-        add(new CreazioneTabella(dbScelto, this));
+        add(new CreazioneTabella(this));
     }
 
-    public void setBtnEnable(boolean enable) {
+    /* public void setBtnEnable(boolean enable) {
         btn_creaTab.setEnabled(enable);
-    }
+    } */
 
     public void eliminaAggiungiColonnaTab(AggColonna ac) {
         arrAc.remove(ac);
@@ -157,7 +157,7 @@ public class Panel extends JPanel implements DocumentListener{
     public void aggNumColValide() {
         lbl_numColValide.setText("Colonne valide: " + numColValide() + " / " + arrAc.size());
 
-        if(numColValide() != arrAc.size()) setBtnEnable(false);
+        if(numColValide() != arrAc.size()); //setBtnEnable(false);
     }
     /**
      * Conta il numero di colonne valide
