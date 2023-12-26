@@ -2,6 +2,8 @@
 
 import javax.swing.JFrame;
 
+import Pagine.Panel;
+
 public class Frame extends JFrame{
 
     public Frame() {
