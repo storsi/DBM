@@ -2,7 +2,7 @@
 
 import javax.swing.JFrame;
 
-import Pagine.Panel;
+import Pagine.NewPanel;
 
 public class Frame extends JFrame{
 
@@ -11,7 +11,7 @@ public class Frame extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        add(new Panel());
+        add(new NewPanel());
 
         pack();
         setLocationRelativeTo(null);
